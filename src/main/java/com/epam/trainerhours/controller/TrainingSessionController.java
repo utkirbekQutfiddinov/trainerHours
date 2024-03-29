@@ -3,10 +3,12 @@ package com.epam.trainerhours.controller;
 import com.epam.trainerhours.model.TrainingSession;
 import com.epam.trainerhours.model.TrainingSessionResponse;
 import com.epam.trainerhours.service.TrainingSessionService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class TrainingSessionController {
     }
 
     @PostMapping
+    @CircuitBreaker(name = "addSession", fallbackMethod = "addSessionFallback")
     public ResponseEntity<TrainingSession> addSession(@RequestBody TrainingSession session) {
         try {
             TrainingSession trainingSession = service.addSession(session);
@@ -40,6 +43,7 @@ public class TrainingSessionController {
     }
 
     @DeleteMapping("/{id}")
+    @CircuitBreaker(name = "deleteSession", fallbackMethod = "deleteSessionFallback")
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
         try {
             boolean deleted = service.deleteSesion(id);
@@ -53,6 +57,7 @@ public class TrainingSessionController {
     }
 
     @GetMapping
+    @CircuitBreaker(name = "getSessions", fallbackMethod = "getSummaryFallback")
     public ResponseEntity<List<TrainingSessionResponse>> getSummary() {
         try {
             List<TrainingSessionResponse> all = service.getAllResponse();
@@ -63,4 +68,18 @@ public class TrainingSessionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<TrainingSession> addSessionFallback(@RequestBody TrainingSession session) {
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<Map<String, Boolean>> deleteSessionFallback(@PathVariable Integer id) {
+        return new ResponseEntity<>(Collections.emptyMap(),HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<TrainingSessionResponse>> getSummaryFallback() {
+        return new ResponseEntity<>(Collections.emptyList(),HttpStatus.OK);
+    }
+
+
 }
