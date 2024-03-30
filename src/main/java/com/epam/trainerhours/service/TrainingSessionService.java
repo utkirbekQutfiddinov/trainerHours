@@ -28,7 +28,7 @@ public class TrainingSessionService {
             return saved;
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage());
-            return null;
+            throw new RuntimeException();
         }
     }
 
@@ -42,7 +42,7 @@ public class TrainingSessionService {
             return true;
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage());
-            return false;
+            throw new RuntimeException();
         }
     }
 
@@ -76,7 +76,7 @@ public class TrainingSessionService {
             return responseList;
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage());
-            return Collections.emptyList();
+            throw new RuntimeException();
         }
     }
 }
