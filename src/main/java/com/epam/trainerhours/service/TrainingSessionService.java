@@ -3,18 +3,18 @@ package com.epam.trainerhours.service;
 import com.epam.trainerhours.model.TrainingSession;
 import com.epam.trainerhours.model.TrainingSessionResponse;
 import com.epam.trainerhours.repository.TrainingSessionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 public class TrainingSessionService {
-    private final Logger logger = Logger.getLogger(TrainingSessionService.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(TrainingSessionService.class);
     private final TrainingSessionRepository repository;
 
     public TrainingSessionService(TrainingSessionRepository repository) {
@@ -26,7 +26,7 @@ public class TrainingSessionService {
             TrainingSession saved = repository.save(session);
             return saved;
         } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage());
+            logger.error(e.getMessage());
             throw new RuntimeException();
         }
     }
@@ -40,7 +40,7 @@ public class TrainingSessionService {
             repository.delete(byId.get());
             return true;
         } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage());
+            logger.error(e.getMessage());
             throw new RuntimeException();
         }
     }
@@ -74,7 +74,7 @@ public class TrainingSessionService {
                     .collect(Collectors.toList());
             return responseList;
         } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage());
+            logger.error(e.getMessage());
             throw new RuntimeException();
         }
     }

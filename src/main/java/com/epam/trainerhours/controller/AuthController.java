@@ -1,6 +1,8 @@
 package com.epam.trainerhours.controller;
 
 import com.epam.trainerhours.config.JwtProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,14 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private static final Logger LOGGER = Logger.getLogger(AuthController.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
     private final UserDetailsService userService;
     private final JwtProvider jwtProvider;
 
@@ -45,7 +45,7 @@ public class AuthController {
 
             return ResponseEntity.ok(Map.of("token", jwtProvider.generateToken(username)));
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "error on login: " + username + ", pass:" + password);
+            LOGGER.error("error on login: " + username + ", pass:" + password);
             return ResponseEntity.internalServerError().build();
         }
     }
