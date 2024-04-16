@@ -16,10 +16,10 @@ public class TrainingSession {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    private String tr_username;
-    private String tr_firstname;
-    private String tr_lastname;
+    private String trUsername;
+    private String trFirstname;
+    private String trLastname;
     private Boolean isActive;
-    private LocalDate tr_date;
-    private Long tr_duration;
+    private LocalDate trDate;
+    private Long trDuration;
 }
