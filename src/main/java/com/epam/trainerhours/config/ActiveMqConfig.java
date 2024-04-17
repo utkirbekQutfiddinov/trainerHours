@@ -2,6 +2,8 @@ package com.epam.trainerhours.config;
 
 import jakarta.jms.ConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +14,8 @@ import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
 public class ActiveMqConfig {
+
+    private final Logger logger = LoggerFactory.getLogger(ActiveMqConfig.class);
 
     @Value("${activemq.broker.username}")
     private String username;
@@ -39,7 +43,10 @@ public class ActiveMqConfig {
 
     @Bean
     public JmsTemplate jmsTemplate(ActiveMQConnectionFactory connectionFactory) {
-        return new JmsTemplate(connectionFactory);
+        JmsTemplate template = new JmsTemplate(connectionFactory);
+        template.setDeliveryPersistent(true);
+        template.setSessionTransacted(true);
+        return template;
     }
 
     @Bean
@@ -47,6 +54,7 @@ public class ActiveMqConfig {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(activeMQConnectionFactory);
         factory.setConcurrency("1-1");
+        factory.setErrorHandler(t -> logger.error("Error at:" + t.getMessage()));
         return factory;
     }
 }
