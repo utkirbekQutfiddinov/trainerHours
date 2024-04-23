@@ -45,6 +45,7 @@ public class AuthController {
 
             return ResponseEntity.ok(Map.of("token", jwtProvider.generateToken(username)));
         } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             LOGGER.error("error on login: " + username + ", pass:" + password);
             return ResponseEntity.internalServerError().build();
         }
