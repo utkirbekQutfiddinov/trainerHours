@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,33 +16,42 @@ import java.util.stream.Collectors;
 @Service
 public class TrainingSessionService {
     private final Logger logger = LoggerFactory.getLogger(TrainingSessionService.class);
-    private final TrainingSessionRepository repository;
+    private final TrainingSessionRepository<TrainingSession,String> repository;
 
-    public TrainingSessionService(TrainingSessionRepository repository) {
+    public TrainingSessionService(TrainingSessionRepository<TrainingSession,String> repository) {
         this.repository = repository;
     }
 
     public TrainingSession addSession(TrainingSession session) {
         try {
-            TrainingSession saved = repository.save(session);
-            return saved;
+            List<TrainingSession> list = repository.findByUsername(session.getTrUsername());
+            if (!list.isEmpty()) {
+                TrainingSession trainingSession = list.getFirst();
+
+                trainingSession.setTrDuration(trainingSession.getTrDuration() + session.getTrDuration());
+                Optional<TrainingSession> saved = repository.save(trainingSession);
+                return saved.orElseThrow();
+            } else {
+                Optional<TrainingSession> saved = repository.save(session);
+                return saved.orElseThrow();
+            }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new RuntimeException();
+            return null;
         }
     }
 
-    public boolean deleteSesion(Integer id) {
+    public boolean deleteSession(String id) {
         try {
             Optional<TrainingSession> byId = repository.findById(id);
             if (byId.isEmpty()) {
                 return false;
             }
-            repository.delete(byId.get());
+            repository.deleteById(byId.get().getId());
             return true;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new RuntimeException();
+            return false;
         }
     }
 
@@ -64,7 +74,7 @@ public class TrainingSessionService {
                             )
                     ));
 
-            List<TrainingSessionResponse> responseList = result.entrySet().stream()
+            return result.entrySet().stream()
                     .map(entry -> new TrainingSessionResponse(
                             entry.getKey(),
                             all.stream().filter(s -> s.getTrUsername().equals(entry.getKey())).findFirst().map(TrainingSession::getTrFirstname).orElse(null),
@@ -72,10 +82,9 @@ public class TrainingSessionService {
                             all.stream().filter(s -> s.getTrUsername().equals(entry.getKey())).findFirst().map(TrainingSession::getIsActive).orElse(null),
                             entry.getValue()))
                     .collect(Collectors.toList());
-            return responseList;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new RuntimeException();
+            return Collections.emptyList();
         }
     }
 }

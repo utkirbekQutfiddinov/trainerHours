@@ -1,20 +1,19 @@
 package com.epam.trainerhours.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
 @Data
-@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Document(collection = "trainingSessions")
 public class TrainingSession {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private String id;
 
     private String trUsername;
     private String trFirstname;
@@ -22,4 +21,5 @@ public class TrainingSession {
     private Boolean isActive;
     private LocalDate trDate;
     private Long trDuration;
+
 }

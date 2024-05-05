@@ -42,13 +42,33 @@ public class TrainingSessionControllerTest {
     }
 
     @Test
+    void addSession_InternalServerError() {
+        TrainingSession session = new TrainingSession();
+        when(service.addSession(session)).thenThrow(new RuntimeException("Test exception"));
+
+        ResponseEntity<TrainingSession> response = controller.addSession(session);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    @Test
     void delete() {
         int id = 1;
-        when(service.deleteSesion(id)).thenReturn(true);
+        when(service.deleteSession(id+"")).thenReturn(true);
 
         ResponseEntity<Map<String, Boolean>> response = controller.delete(id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void delete_InternalServerError() {
+        Integer id = 1;
+        when(service.deleteSession(id.toString())).thenThrow(new RuntimeException("Test exception"));
+
+        ResponseEntity<Map<String, Boolean>> response = controller.delete(id);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
     @Test
@@ -60,5 +80,44 @@ public class TrainingSessionControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseList, response.getBody());
+    }
+
+    @Test
+    void getSummary_InternalServerError() {
+        when(service.getAllResponse()).thenThrow(new RuntimeException("Test exception"));
+
+        ResponseEntity<List<TrainingSessionResponse>> response = controller.getSummary();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    @Test
+    void addSessionFallback() {
+        Throwable throwable = new RuntimeException("Test exception");
+
+        ResponseEntity<Map<String, String>> response = controller.addSessionFallback(throwable);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Test exception", response.getBody().get("error"));
+    }
+
+    @Test
+    void deleteSessionFallback() {
+        Throwable throwable = new RuntimeException("Test exception");
+
+        ResponseEntity<Map<String, String>> response = controller.deleteSessionFallback(throwable);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Test exception", response.getBody().get("error"));
+    }
+
+    @Test
+    void getSummaryFallback() {
+        Throwable throwable = new RuntimeException("Test exception");
+
+        ResponseEntity<Map<String, String>> response = controller.getSummaryFallback(throwable);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Test exception", response.getBody().get("error"));
     }
 }

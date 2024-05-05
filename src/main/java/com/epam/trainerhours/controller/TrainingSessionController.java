@@ -45,7 +45,7 @@ public class TrainingSessionController {
     @CircuitBreaker(name = "deleteSession", fallbackMethod = "deleteSessionFallback")
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
         try {
-            boolean deleted = service.deleteSesion(id);
+            boolean deleted = service.deleteSession(id.toString());
             return new ResponseEntity<>(new HashMap<>() {{
                 put("success", deleted);
             }}, deleted ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);

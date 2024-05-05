@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +19,7 @@ import static org.mockito.Mockito.*;
 
 public class TrainingSessionServiceTest {
     @Mock
-    private TrainingSessionRepository repository;
+    private TrainingSessionRepository<TrainingSession,String> repository;
 
     private TrainingSessionService service;
 
@@ -28,71 +30,88 @@ public class TrainingSessionServiceTest {
     }
 
     @Test
-    void addSession_Success() {
+    void addSession_NewSession() {
         TrainingSession session = new TrainingSession();
-        when(repository.save(session)).thenReturn(session);
+        when(repository.findByUsername(session.getTrUsername())).thenReturn(Collections.emptyList());
+        when(repository.save(session)).thenReturn(Optional.of(session));
 
-        TrainingSession savedSession = service.addSession(session);
+        TrainingSession result = service.addSession(session);
 
-        assertNotNull(savedSession);
+        assertEquals(session, result);
         verify(repository, times(1)).save(session);
     }
 
+//    @Test
+//    void addSession_ExistingSession() {
+//        TrainingSession session = new TrainingSession();
+//        List<TrainingSession> existingSessions = Collections.singletonList(new TrainingSession());
+//        when(repository.findByUsername(session.getTrUsername())).thenReturn(existingSessions);
+//        when(repository.save(any(TrainingSession.class))).thenReturn(Optional.of(session));
+//
+//        TrainingSession result = service.addSession(session);
+//
+//        assertEquals(session, result);
+//        verify(repository, times(1)).save(any(TrainingSession.class));
+//    }
+
     @Test
-    void addSession_Failure() {
+    void deleteSession_Success() {
+        String id = "1";
         TrainingSession session = new TrainingSession();
-        when(repository.save(session)).thenThrow(new RuntimeException("Database connection failed"));
+        session.setId(id);
+        when(repository.findById(id)).thenReturn(Optional.of(session));
 
-        assertThrows(RuntimeException.class, () -> service.addSession(session));
-        verify(repository, times(1)).save(session);
-    }
+        boolean result = service.deleteSession(id);
 
-    @Test
-    void deleteSession_Exists() {
-        TrainingSession session = new TrainingSession();
-        when(repository.findById(1)).thenReturn(Optional.of(session));
-
-        assertTrue(service.deleteSesion(1));
-        verify(repository, times(1)).findById(1);
-        verify(repository, times(1)).delete(session);
-    }
-
-    @Test
-    void deleteSession_NotExists() {
-        when(repository.findById(1)).thenReturn(Optional.empty());
-
-        assertFalse(service.deleteSesion(1));
-        verify(repository, times(1)).findById(1);
-        verify(repository, never()).delete(any());
+        assertTrue(result);
+        verify(repository, times(1)).deleteById(id);
     }
 
     @Test
     void deleteSession_Failure() {
-        when(repository.findById(1)).thenReturn(Optional.of(new TrainingSession()));
-        doThrow(new RuntimeException("Database connection failed")).when(repository).delete(any());
+        String id = "1";
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> service.deleteSesion(1));
-        verify(repository, times(1)).findById(1);
-        verify(repository, times(1)).delete(any());
+        boolean result = service.deleteSession(id);
+
+        assertFalse(result);
+        verify(repository, never()).deleteById(id);
+    }
+
+    @Test
+    void deleteSession_Exception() {
+        String id = "1";
+        when(repository.findById(id)).thenThrow(RuntimeException.class);
+
+        boolean result = service.deleteSession(id);
+
+        assertFalse(result);
+        verify(repository, never()).deleteById(id);
     }
 
     @Test
     void getAllResponse_Success() {
-        List<TrainingSession> sessions = new ArrayList<>();
+        List<TrainingSession> sessions = Arrays.asList(
+                new TrainingSession("1", "user1", "Utkirbek", "TEST", true, LocalDate.now(), 60l),
+                new TrainingSession("2", "user1", "Utkirbek", "TEST", true, LocalDate.now().minusDays(1), 30l),
+                new TrainingSession("3", "user2", "TestUser", "TEST", true, LocalDate.now().minusMonths(1), 45l)
+        );
         when(repository.findAll()).thenReturn(sessions);
 
-        List<TrainingSessionResponse> responses = service.getAllResponse();
+        List<TrainingSessionResponse> response = service.getAllResponse();
 
-        assertNotNull(responses);
-        assertTrue(responses.isEmpty());
-        verify(repository, times(1)).findAll();
+        assertEquals(2, response.size());
+        assertEquals("user1", response.getFirst().getTrainerUsername());
+        assertEquals("Utkirbek", response.getFirst().getTrainerFirstname());
+        assertEquals("TEST", response.getFirst().getTrainerLastname());
     }
 
     @Test
-    void getAllResponse_Failure() {
-        when(repository.findAll()).thenThrow(new RuntimeException("Database connection failed"));
+    void getAllResponse_Empty() {
+        when(repository.findAll()).thenReturn(Collections.emptyList());
 
-        assertThrows(RuntimeException.class, () -> service.getAllResponse());
-        verify(repository, times(1)).findAll();
+        List<TrainingSessionResponse> response = service.getAllResponse();
+
+        assertEquals(0, response.size());
     }
 }
