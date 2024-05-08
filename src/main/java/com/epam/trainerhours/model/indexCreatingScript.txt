@@ -1,0 +1,6 @@
+1. go to needed db using for example:
+"use trainerHours"
+
+2. create an index by "trFirstname" and "trLastname":
+
+"db.createIndex({"trFirstName":1,"trLastname":1})"
