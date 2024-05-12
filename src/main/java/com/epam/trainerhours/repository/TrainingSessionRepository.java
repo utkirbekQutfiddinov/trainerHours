@@ -1,9 +1,18 @@
 package com.epam.trainerhours.repository;
 
-import com.epam.trainerhours.model.TrainingSession;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
 
-@Repository
-public interface TrainingSessionRepository extends JpaRepository<TrainingSession,Integer> {
+public interface TrainingSessionRepository<T, ID> {
+    List<T> findAll();
+
+    List<T> findByUsername(String username);
+
+    Optional<T> save(T item);
+
+    Optional<T> findById(ID id);
+
+    void deleteById(ID id);
+
+    Optional<Boolean> updateByUsername(String username, T document);
 }

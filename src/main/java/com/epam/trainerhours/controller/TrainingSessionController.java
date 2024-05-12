@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class TrainingSessionController {
                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
-            logger.error( e.getMessage());
+            logger.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -46,12 +45,12 @@ public class TrainingSessionController {
     @CircuitBreaker(name = "deleteSession", fallbackMethod = "deleteSessionFallback")
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
         try {
-            boolean deleted = service.deleteSesion(id);
+            boolean deleted = service.deleteSession(id.toString());
             return new ResponseEntity<>(new HashMap<>() {{
                 put("success", deleted);
             }}, deleted ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            logger.error( e.getMessage());
+            logger.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -64,21 +63,21 @@ public class TrainingSessionController {
             return new ResponseEntity<>(all, HttpStatus.OK);
 
         } catch (Exception e) {
-            logger.error( e.getMessage());
+            logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<TrainingSession> addSessionFallback(@RequestBody TrainingSession session) {
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Map<String, String>> addSessionFallback(Throwable throwable) {
+        return new ResponseEntity<>(Map.of("error", throwable.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<Map<String, Boolean>> deleteSessionFallback(@PathVariable Integer id) {
-        return new ResponseEntity<>(Collections.emptyMap(),HttpStatus.OK);
+    public ResponseEntity<Map<String, String>> deleteSessionFallback(Throwable throwable) {
+        return new ResponseEntity<>(Map.of("error", throwable.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<List<TrainingSessionResponse>> getSummaryFallback() {
-        return new ResponseEntity<>(Collections.emptyList(),HttpStatus.OK);
+    public ResponseEntity<Map<String, String>> getSummaryFallback(Throwable throwable) {
+        return new ResponseEntity<>(Map.of("error", throwable.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
