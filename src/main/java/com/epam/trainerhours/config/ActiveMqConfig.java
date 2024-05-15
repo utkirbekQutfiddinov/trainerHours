@@ -26,9 +26,14 @@ public class ActiveMqConfig {
     @Value("${activemq.broker.url}")
     private String brokerUrl;
 
+    @Value("${activemq.consumer.min}")
+    private String consumerMin;
+
+    @Value("${activemq.consumer.max}")
+    private String consumerMax;
+
     @Bean
-    public JmsListenerContainerFactory listenerFactory(ConnectionFactory factory,
-                                                       DefaultJmsListenerContainerFactoryConfigurer configurer) {
+    public JmsListenerContainerFactory listenerFactory(ConnectionFactory factory, DefaultJmsListenerContainerFactoryConfigurer configurer) {
         DefaultJmsListenerContainerFactory containerFactory = new DefaultJmsListenerContainerFactory();
         configurer.configure(containerFactory, factory);
 
@@ -53,7 +58,7 @@ public class ActiveMqConfig {
     public DefaultJmsListenerContainerFactory defaultJmsListenerContainerFactory(ActiveMQConnectionFactory activeMQConnectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(activeMQConnectionFactory);
-        factory.setConcurrency("1-1");
+        factory.setConcurrency(consumerMin + "-" + consumerMax);
         factory.setErrorHandler(t -> logger.error("Error at:" + t.getMessage()));
         return factory;
     }
