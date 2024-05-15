@@ -41,19 +41,6 @@ public class TrainingSessionServiceTest {
         verify(repository, times(1)).save(session);
     }
 
-//    @Test
-//    void addSession_ExistingSession() {
-//        TrainingSession session = new TrainingSession();
-//        List<TrainingSession> existingSessions = Collections.singletonList(new TrainingSession());
-//        when(repository.findByUsername(session.getTrUsername())).thenReturn(existingSessions);
-//        when(repository.save(any(TrainingSession.class))).thenReturn(Optional.of(session));
-//
-//        TrainingSession result = service.addSession(session);
-//
-//        assertEquals(session, result);
-//        verify(repository, times(1)).save(any(TrainingSession.class));
-//    }
-
     @Test
     void deleteSession_Success() {
         String id = "1";
@@ -109,6 +96,15 @@ public class TrainingSessionServiceTest {
     @Test
     void getAllResponse_Empty() {
         when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<TrainingSessionResponse> response = service.getAllResponse();
+
+        assertEquals(0, response.size());
+    }
+
+    @Test
+    void getAllResponse_Exception() {
+        when(repository.findAll()).thenThrow(RuntimeException.class);
 
         List<TrainingSessionResponse> response = service.getAllResponse();
 
