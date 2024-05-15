@@ -117,7 +117,8 @@ public class TrainingSessionRepositoryImplTest {
         when(deleteResult.getDeletedCount()).thenReturn(1L);
         when(mongoTemplate.remove(session)).thenReturn(deleteResult);
 
-        repository.deleteById(id);
+        Optional<Boolean> deleted = repository.deleteById(id);
+        assertTrue(deleted.get());
 
         verify(mongoTemplate, times(1)).remove(session);
     }
@@ -127,7 +128,9 @@ public class TrainingSessionRepositoryImplTest {
         String id = "1";
         when(mongoTemplate.findById(id, TrainingSession.class)).thenReturn(null);
 
-        repository.deleteById(id);
+        Optional<Boolean> deleted = repository.deleteById(id);
+
+        assertTrue(deleted.isEmpty());
 
         verify(mongoTemplate, never()).remove(any());
     }

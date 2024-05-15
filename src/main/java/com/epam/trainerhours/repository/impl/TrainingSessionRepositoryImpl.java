@@ -62,21 +62,27 @@ public class TrainingSessionRepositoryImpl implements TrainingSessionRepository<
     }
 
     @Override
-    public void deleteById(String id) {
+    public Optional<Boolean> deleteById(String id) {
         try {
             TrainingSession documentToDelete = mongoTemplate.findById(id, TrainingSession.class);
 
             if (documentToDelete == null) {
                 logger.error("Document does not exist with id: " + id);
-                return;
+                return Optional.empty();
             }
 
             DeleteResult remove = mongoTemplate.remove(documentToDelete);
 
             if (remove.getDeletedCount() == 0) {
+                logger.error("Could not delete session item on ID: " + id);
+                return Optional.of(false);
+            } else {
+                return Optional.of(true);
             }
+
         } catch (Exception e) {
             logger.error(e.getMessage());
+            return Optional.empty();
         }
     }
 

@@ -12,7 +12,7 @@ public interface TrainingSessionRepository<T, ID> {
 
     Optional<T> findById(ID id);
 
-    void deleteById(ID id);
+    Optional<Boolean> deleteById(ID id);
 
     Optional<Boolean> updateByUsername(String username, T document);
 }
