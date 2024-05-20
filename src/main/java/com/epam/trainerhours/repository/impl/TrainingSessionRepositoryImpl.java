@@ -30,39 +30,39 @@ public class TrainingSessionRepositoryImpl implements TrainingSessionRepository<
     }
 
     @Override
-    public List<TrainingSession> findByUsername(String username) {
+    public List<TrainingSession> findByUsername(String username) throws Exception {
         try {
             Query query = new Query(Criteria.where("trUsername").is(username));
             return mongoTemplate.find(query, TrainingSession.class);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return Collections.emptyList();
+            throw new Exception("item not found with username: "+username);
         }
     }
 
     @Override
-    public Optional<TrainingSession> save(TrainingSession item) {
+    public Optional<TrainingSession> save(TrainingSession item) throws Exception {
         try {
             TrainingSession saved = mongoTemplate.save(item);
             return Optional.of(saved);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return Optional.empty();
+            throw new Exception("Cannot save item: "+item);
         }
     }
 
     @Override
-    public Optional<TrainingSession> findById(String id) {
+    public Optional<TrainingSession> findById(String id) throws Exception {
         try {
-            return Optional.of(mongoTemplate.findById(id, TrainingSession.class));
+            return Optional.ofNullable(mongoTemplate.findById(id, TrainingSession.class));
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return Optional.empty();
+            throw new Exception("Cannot find by id="+id);
         }
     }
 
     @Override
-    public Optional<Boolean> deleteById(String id) {
+    public Optional<Boolean> deleteById(String id) throws Exception {
         try {
             TrainingSession documentToDelete = mongoTemplate.findById(id, TrainingSession.class);
 
@@ -82,12 +82,12 @@ public class TrainingSessionRepositoryImpl implements TrainingSessionRepository<
 
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return Optional.empty();
+            throw new Exception("Cannot delete item id="+id);
         }
     }
 
     @Override
-    public Optional<Boolean> updateByUsername(String username, TrainingSession document) {
+    public Optional<Boolean> updateByUsername(String username, TrainingSession document) throws Exception {
         try {
             Query query = new Query(Criteria.where("username").is(username));
             Update update = new Update().set("trDuration", document.getTrDuration());
@@ -98,7 +98,7 @@ public class TrainingSessionRepositoryImpl implements TrainingSessionRepository<
             return Optional.of(true);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return Optional.empty();
+            throw new Exception("Cannot update document by username="+username);
         }
 
     }
