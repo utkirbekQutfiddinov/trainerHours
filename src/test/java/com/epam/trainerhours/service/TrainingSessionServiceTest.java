@@ -30,7 +30,7 @@ public class TrainingSessionServiceTest {
     }
 
     @Test
-    void addSession_NewSession() {
+    void addSession_NewSession() throws Exception {
         TrainingSession session = new TrainingSession();
         when(repository.findByUsername(session.getTrUsername())).thenReturn(Collections.emptyList());
         when(repository.save(session)).thenReturn(Optional.of(session));
@@ -41,21 +41,8 @@ public class TrainingSessionServiceTest {
         verify(repository, times(1)).save(session);
     }
 
-//    @Test
-//    void addSession_ExistingSession() {
-//        TrainingSession session = new TrainingSession();
-//        List<TrainingSession> existingSessions = Collections.singletonList(new TrainingSession());
-//        when(repository.findByUsername(session.getTrUsername())).thenReturn(existingSessions);
-//        when(repository.save(any(TrainingSession.class))).thenReturn(Optional.of(session));
-//
-//        TrainingSession result = service.addSession(session);
-//
-//        assertEquals(session, result);
-//        verify(repository, times(1)).save(any(TrainingSession.class));
-//    }
-
     @Test
-    void deleteSession_Success() {
+    void deleteSession_Success() throws Exception {
         String id = "1";
         TrainingSession session = new TrainingSession();
         session.setId(id);
@@ -68,7 +55,7 @@ public class TrainingSessionServiceTest {
     }
 
     @Test
-    void deleteSession_Failure() {
+    void deleteSession_Failure() throws Exception {
         String id = "1";
         when(repository.findById(id)).thenReturn(Optional.empty());
 
@@ -79,7 +66,7 @@ public class TrainingSessionServiceTest {
     }
 
     @Test
-    void deleteSession_Exception() {
+    void deleteSession_Exception() throws Exception {
         String id = "1";
         when(repository.findById(id)).thenThrow(RuntimeException.class);
 
@@ -90,7 +77,7 @@ public class TrainingSessionServiceTest {
     }
 
     @Test
-    void getAllResponse_Success() {
+    void getAllResponse_Success() throws Exception {
         List<TrainingSession> sessions = Arrays.asList(
                 new TrainingSession("1", "user1", "Utkirbek", "TEST", true, LocalDate.now(), 60l),
                 new TrainingSession("2", "user1", "Utkirbek", "TEST", true, LocalDate.now().minusDays(1), 30l),
@@ -107,8 +94,17 @@ public class TrainingSessionServiceTest {
     }
 
     @Test
-    void getAllResponse_Empty() {
+    void getAllResponse_Empty() throws Exception {
         when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<TrainingSessionResponse> response = service.getAllResponse();
+
+        assertEquals(0, response.size());
+    }
+
+    @Test
+    void getAllResponse_Exception() throws Exception {
+        when(repository.findAll()).thenThrow(RuntimeException.class);
 
         List<TrainingSessionResponse> response = service.getAllResponse();
 

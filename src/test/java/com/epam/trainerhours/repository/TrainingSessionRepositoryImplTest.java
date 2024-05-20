@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class TrainingSessionRepositoryImplTest {
@@ -44,7 +45,7 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void findByUsername_Success() {
+    void findByUsername_Success() throws Exception {
         String username = "testUser";
         List<TrainingSession> sessions = Collections.singletonList(new TrainingSession());
         Query query = new Query(Criteria.where("trUsername").is(username));
@@ -56,18 +57,20 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void findByUsername_Exception() {
+    void findByUsername_Exception() throws Exception {
         String username = "testUser";
         Query query = new Query(Criteria.where("trUsername").is(username));
         when(mongoTemplate.find(query, TrainingSession.class)).thenThrow(RuntimeException.class);
 
-        List<TrainingSession> result = repository.findByUsername(username);
+        Exception exception=assertThrows(Exception.class,()->{
+            repository.findByUsername(username);
+        });
 
-        assertEquals(0, result.size());
+        assertNotNull(exception);
     }
 
     @Test
-    void save_Success() {
+    void save_Success() throws Exception {
         TrainingSession session = new TrainingSession();
         when(mongoTemplate.save(session)).thenReturn(session);
 
@@ -78,16 +81,18 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void save_Exception() {
+    void save_Exception() throws Exception {
         when(mongoTemplate.save(any())).thenThrow(RuntimeException.class);
 
-        Optional<TrainingSession> result = repository.save(new TrainingSession());
+        Exception exception=assertThrows(Exception.class,()->{
+            repository.save(new TrainingSession());
+        });
 
-        assertFalse(result.isPresent());
+        assertNotNull(exception);
     }
 
     @Test
-    void findById_Success() {
+    void findById_Success() throws Exception {
         String id = "1";
         TrainingSession session = new TrainingSession();
         when(mongoTemplate.findById(id, TrainingSession.class)).thenReturn(session);
@@ -99,7 +104,7 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void findById_NotFound() {
+    void findById_NotFound() throws Exception {
         String id = "1";
         when(mongoTemplate.findById(id, TrainingSession.class)).thenReturn(null);
 
@@ -109,7 +114,7 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void deleteById_Success() {
+    void deleteById_Success() throws Exception {
         String id = "1";
         TrainingSession session = new TrainingSession();
         when(mongoTemplate.findById(id, TrainingSession.class)).thenReturn(session);
@@ -117,23 +122,26 @@ public class TrainingSessionRepositoryImplTest {
         when(deleteResult.getDeletedCount()).thenReturn(1L);
         when(mongoTemplate.remove(session)).thenReturn(deleteResult);
 
-        repository.deleteById(id);
+        Optional<Boolean> deleted = repository.deleteById(id);
+        assertTrue(deleted.get());
 
         verify(mongoTemplate, times(1)).remove(session);
     }
 
     @Test
-    void deleteById_NotFound() {
+    void deleteById_NotFound() throws Exception {
         String id = "1";
         when(mongoTemplate.findById(id, TrainingSession.class)).thenReturn(null);
 
-        repository.deleteById(id);
+        Optional<Boolean> deleted = repository.deleteById(id);
+
+        assertTrue(deleted.isEmpty());
 
         verify(mongoTemplate, never()).remove(any());
     }
 
     @Test
-    void updateByUsername_Success() {
+    void updateByUsername_Success() throws Exception {
         String username = "testUser";
         TrainingSession session = new TrainingSession();
         UpdateResult updateResult = mock(UpdateResult.class);
@@ -147,7 +155,7 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void updateByUsername_NotFound() {
+    void updateByUsername_NotFound() throws Exception {
         String username = "testUser";
         TrainingSession session = new TrainingSession();
         UpdateResult updateResult = mock(UpdateResult.class);
@@ -161,13 +169,17 @@ public class TrainingSessionRepositoryImplTest {
     }
 
     @Test
-    void updateByUsername_Exception() {
+    void updateByUsername_Exception() throws Exception {
         String username = "testUser";
         TrainingSession session = new TrainingSession();
         when(mongoTemplate.updateFirst(any(Query.class), any(Update.class), eq(TrainingSession.class))).thenThrow(new RuntimeException("Test Exception"));
 
-        Optional<Boolean> result = repository.updateByUsername(username, session);
+//        Optional<Boolean> result = repository.updateByUsername(username, session);
 
-        assertTrue(result.isEmpty());
+        Exception exception = assertThrows(Exception.class, () -> {
+            repository.updateByUsername(username, session);
+        });
+        assertNotNull(exception);
+
     }
 }
